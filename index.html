@@ -3,7 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DRINK-UP — Zobo Juice & Pastries</title>
+<title>DRINK-UP Zobo | Original Hand-Brewed Zobo Juice & Pastries in Lagos & Abuja</title>
+<meta name="description" content="DRINK-UP hand-brews the original zobo juice the slow way, real petals, real spice, zero shortcuts. Order bottled hibiscus zobo drinks and pastries online, pay by transfer, and get it delivered.">
+<meta name="keywords" content="zobo juice, hibiscus drink, zobo drink Nigeria, buy zobo online, zobo pastries, Drink-Up zobo, Lagos zobo, Abuja zobo, hand-brewed zobo, bottled zobo drink">
+<meta name="robots" content="index, follow">
+<meta name="author" content="DRINK-UP Zobo & Pastries">
+<link rel="canonical" href="https://www.drinkupzobo.com/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="DRINK-UP Zobo | Original Hand-Brewed Zobo Juice & Pastries">
+<meta property="og:description" content="The original zobo, bottled beautifully. Real petals, real spice, zero shortcuts, the drink your grandmother would recognize, dressed for the table.">
+<meta property="og:url" content="https://www.drinkupzobo.com/">
+<meta property="og:site_name" content="DRINK-UP Zobo">
+<meta property="og:locale" content="en_NG">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DRINK-UP Zobo | Original Hand-Brewed Zobo Juice & Pastries">
+<meta name="twitter:description" content="The original zobo, bottled beautifully. Hand-brewed hibiscus zobo juice and pastries, order online today.">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "DRINK-UP Zobo & Pastries",
+  "url": "https://www.drinkupzobo.com/",
+  "description": "Hand-brewed hibiscus zobo juice and pastries, made the slow way with real petals and real spice.",
+  "telephone": "+2348142800185",
+  "priceRange": "₦1500 - ₦4000",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "NG"
+  },
+  "servesCuisine": "Beverages",
+  "makesOffer": [
+    {
+      "@type": "Offer",
+      "itemOffered": { "@type": "Product", "name": "Zobo Juice (Small Bottle)" },
+      "priceCurrency": "NGN",
+      "price": "1500"
+    }
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -999,6 +1044,16 @@
   }
   .order-summary .price{ color:var(--wine); }
   .order-note{ font-size:13px; color:#888; margin-bottom:16px; line-height:1.5; }
+  .order-form{ display:flex; flex-direction:column; gap:12px; margin-bottom:4px; }
+  .order-field{ display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--ink); font-weight:600; }
+  .order-field input{
+    font-family:var(--body); font-size:16px; font-weight:400;
+    padding:11px 14px; border:1.5px solid #e4d8c9; border-radius:10px;
+    background:#fff; color:var(--ink); outline:none; transition:border-color .2s;
+  }
+  .order-field input:focus{ border-color:var(--wine); }
+  .order-field-error{ color:var(--hibiscus-bright); font-size:13px; margin:-2px 0 6px; }
+  .order-modal .btn-primary:disabled{ opacity:.7; cursor:not-allowed; transform:none; }
   .order-modal .btn-primary, .order-modal .btn-ghost{
     width:100%; text-align:center; justify-content:center; display:flex;
     margin-bottom:10px; box-sizing:border-box;
@@ -1361,8 +1416,28 @@
         <span id="orderProductName">Product</span>
         <span class="price" id="orderProductPrice">₦0</span>
       </div>
-      <p class="order-note">Tap below to confirm. This lets us know an order is coming in, then shows you our bank details and a WhatsApp link to send your proof of payment.</p>
-      <button type="button" class="btn btn-primary" id="orderConfirmBtn">Confirm Order →</button>
+      <p class="order-note">Fill in your details below. This lets us know an order is coming in, then shows you our bank details and a WhatsApp link to send your proof of payment.</p>
+
+      <form id="orderForm" class="order-form">
+        <label class="order-field">
+          <span>Full Name</span>
+          <input type="text" id="orderCustomerName" name="customer_name" placeholder="e.g. Amaka Johnson" required>
+        </label>
+        <label class="order-field">
+          <span>Phone Number</span>
+          <input type="tel" id="orderCustomerPhone" name="customer_phone" placeholder="e.g. 0803 123 4567" required>
+        </label>
+        <label class="order-field">
+          <span>Delivery Address</span>
+          <input type="text" id="orderCustomerAddress" name="customer_address" placeholder="Street, area, city" required>
+        </label>
+        <label class="order-field">
+          <span>Quantity</span>
+          <input type="number" id="orderQuantity" name="quantity" min="1" value="1" required>
+        </label>
+        <div class="order-field-error" id="orderFormError" style="display:none;">Please fill in all fields before continuing.</div>
+        <button type="submit" class="btn btn-primary" id="orderConfirmBtn">Confirm Order →</button>
+      </form>
     </div>
 
     <!-- Step 2: payment details + QR + WhatsApp confirm -->
@@ -1462,32 +1537,66 @@
     if (e.target === orderOverlay) closeOrderModal();
   });
 
-  orderConfirmBtn.addEventListener('click', () => {
-    // Send the order notification email (fire-and-forget; don't block the customer)
+  const orderForm = document.getElementById('orderForm');
+  const orderFormError = document.getElementById('orderFormError');
+
+  orderForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const customerName = document.getElementById('orderCustomerName').value.trim();
+    const customerPhone = document.getElementById('orderCustomerPhone').value.trim();
+    const customerAddress = document.getElementById('orderCustomerAddress').value.trim();
+    const quantity = document.getElementById('orderQuantity').value.trim();
+
+    if (!customerName || !customerPhone || !customerAddress || !quantity) {
+      orderFormError.style.display = 'block';
+      return;
+    }
+    orderFormError.style.display = 'none';
+
+    const btn = document.getElementById('orderConfirmBtn');
+    const originalBtnText = btn.textContent;
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    const proceedToPayment = (emailSent) => {
+      // Build the WhatsApp confirm link, now including the customer's own details
+      const waMessage = `Hi DRINK-UP, I just placed an order.%0AName: ${encodeURIComponent(customerName)}%0APhone: ${encodeURIComponent(customerPhone)}%0AAddress: ${encodeURIComponent(customerAddress)}%0AProduct: ${encodeURIComponent(currentOrder.product)}%0AQuantity: ${encodeURIComponent(quantity)}%0APrice: ${encodeURIComponent(currentOrder.price)}`;
+      orderWaConfirmBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
+
+      // Build the QR code from the bank details (uses a public QR image API)
+      document.getElementById('orderQrImg').src =
+        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(BANK_DETAILS_TEXT);
+
+      orderStep1.classList.remove('active');
+      orderStep2.classList.add('active');
+      orderSentNote.style.display = 'block';
+      orderSentNote.textContent = emailSent
+        ? '✓ Order notification sent to DRINK-UP.'
+        : 'Order details ready, send us your proof of payment on WhatsApp below.';
+
+      btn.textContent = originalBtnText;
+      btn.disabled = false;
+    };
+
     if (window.emailjs) {
       emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        product_name: currentOrder.product,
-        product_price: currentOrder.price,
-        message: `New order request: ${currentOrder.product} (${currentOrder.price})`,
-        page: window.location.href,
-        time: new Date().toLocaleString()
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        customer_address: customerAddress,
+        product_name: `${currentOrder.product} (${currentOrder.price})`,
+        quantity: quantity
       }).then(() => {
         console.log('Order notification email sent.');
+        proceedToPayment(true);
       }).catch((err) => {
         console.error('EmailJS error:', err);
+        proceedToPayment(false);
       });
+    } else {
+      console.error('EmailJS did not load.');
+      proceedToPayment(false);
     }
-
-    // Build the WhatsApp confirm link
-    orderWaConfirmBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${currentOrder.waText}`;
-
-    // Build the QR code from the bank details (uses a public QR image API)
-    document.getElementById('orderQrImg').src =
-      'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(BANK_DETAILS_TEXT);
-
-    orderStep1.classList.remove('active');
-    orderStep2.classList.add('active');
-    orderSentNote.style.display = 'block';
   });
 
   orderBackBtn.addEventListener('click', () => {
